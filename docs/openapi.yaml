@@ -1,0 +1,776 @@
+openapi: 3.0.3
+info:
+  title: IoT Greenhouse Monitoring API
+  version: 1.0.0
+  description: 'MVP REST API monitoring sensor greenhouse: perangkat, sensor, telemetri,
+    aturan & alert.'
+servers:
+- url: http://localhost:5000
+paths:
+  /health:
+    get:
+      tags:
+      - System
+      summary: Cek status layanan
+      responses:
+        '200':
+          description: Berhasil
+  /api/v1/users:
+    post:
+      tags:
+      - Users
+      summary: Buat user
+      responses:
+        '201':
+          description: Berhasil
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            example:
+              username: budi
+              email: budi@example.com
+              password: Rahasia123
+              role: admin
+    get:
+      tags:
+      - Users
+      summary: Daftar user (q, role, sort, page, per_page)
+      responses:
+        '200':
+          description: Berhasil
+        '422':
+          $ref: '#/components/responses/Error'
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/v1/users/{id}:
+    get:
+      tags:
+      - Users
+      summary: Detail user
+      responses:
+        '200':
+          description: Berhasil
+        '404':
+          $ref: '#/components/responses/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags:
+      - Users
+      summary: Ganti seluruh data user
+      responses:
+        '200':
+          description: Berhasil
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            example:
+              username: budi
+              email: budi@example.com
+              role: operator
+    patch:
+      tags:
+      - Users
+      summary: Ubah sebagian data user
+      responses:
+        '200':
+          description: Berhasil
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            example:
+              role: viewer
+    delete:
+      tags:
+      - Users
+      summary: Hapus user (ditolak bila punya device)
+      responses:
+        '204':
+          description: Berhasil
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+  /api/v1/devices:
+    post:
+      tags:
+      - Devices
+      summary: Registrasi device (API key tampil sekali)
+      responses:
+        '201':
+          description: Berhasil
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            example:
+              name: Controller A
+              serial_number: GH-ESP32-001
+              device_type: esp32
+              location: Greenhouse A
+              owner_id: 1
+    get:
+      tags:
+      - Devices
+      summary: Daftar device (q, status, device_type, owner_id, sort, page, per_page)
+      responses:
+        '200':
+          description: Berhasil
+        '422':
+          $ref: '#/components/responses/Error'
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/v1/devices/{id}:
+    get:
+      tags:
+      - Devices
+      summary: Detail device
+      responses:
+        '200':
+          description: Berhasil
+        '404':
+          $ref: '#/components/responses/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags:
+      - Devices
+      summary: Ganti seluruh data device
+      responses:
+        '200':
+          description: Berhasil
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            example:
+              name: Controller A2
+              serial_number: GH-ESP32-001
+              device_type: esp32
+              owner_id: 1
+    patch:
+      tags:
+      - Devices
+      summary: Ubah sebagian data device
+      responses:
+        '200':
+          description: Berhasil
+        '404':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            example:
+              status: maintenance
+    delete:
+      tags:
+      - Devices
+      summary: Hapus device beserta sensor/telemetri
+      responses:
+        '204':
+          description: Berhasil
+        '404':
+          $ref: '#/components/responses/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+  /api/v1/devices/{id}/rotate-key:
+    post:
+      tags:
+      - Devices
+      summary: Putar API key device
+      responses:
+        '200':
+          description: Berhasil
+        '404':
+          $ref: '#/components/responses/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+  /api/v1/devices/{id}/sensors:
+    post:
+      tags:
+      - Sensors
+      summary: Tambah sensor ke device
+      responses:
+        '201':
+          description: Berhasil
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            example:
+              name: temp-1
+              sensor_type: temperature
+              unit: C
+              min_valid: -10
+              max_valid: 60
+    get:
+      tags:
+      - Sensors
+      summary: Daftar sensor milik device (sensor_type, sort, page)
+      responses:
+        '200':
+          description: Berhasil
+        '404':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/v1/sensors/{id}:
+    get:
+      tags:
+      - Sensors
+      summary: Detail sensor
+      responses:
+        '200':
+          description: Berhasil
+        '404':
+          $ref: '#/components/responses/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags:
+      - Sensors
+      summary: Ganti seluruh data sensor
+      responses:
+        '200':
+          description: Berhasil
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            example:
+              name: temp-1
+              sensor_type: temperature
+              unit: C
+    patch:
+      tags:
+      - Sensors
+      summary: Ubah sebagian data sensor
+      responses:
+        '200':
+          description: Berhasil
+        '404':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            example:
+              max_valid: 70
+    delete:
+      tags:
+      - Sensors
+      summary: Hapus sensor
+      responses:
+        '204':
+          description: Berhasil
+        '404':
+          $ref: '#/components/responses/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+  /api/v1/devices/{id}/telemetry:
+    post:
+      tags:
+      - Telemetry
+      summary: Kirim telemetri (tunggal atau batch). Header X-API-Key wajib
+      responses:
+        '201':
+          description: Berhasil
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            example:
+              sensor_id: 1
+              value: 35.4
+      security:
+      - DeviceApiKey: []
+  /api/v1/sensors/{id}/telemetry:
+    get:
+      tags:
+      - Telemetry
+      summary: Riwayat telemetri (from, to, sort, page)
+      responses:
+        '200':
+          description: Berhasil
+        '404':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/v1/sensors/{id}/telemetry/stats:
+    get:
+      tags:
+      - Telemetry
+      summary: Statistik count/min/max/avg (from, to)
+      responses:
+        '200':
+          description: Berhasil
+        '404':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/v1/sensors/{id}/rules:
+    post:
+      tags:
+      - Alerts
+      summary: Buat aturan alert
+      responses:
+        '201':
+          description: Berhasil
+        '404':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            example:
+              name: Suhu tinggi
+              operator: gt
+              threshold: 32
+              severity: high
+    get:
+      tags:
+      - Alerts
+      summary: Daftar aturan alert sensor
+      responses:
+        '200':
+          description: Berhasil
+        '404':
+          $ref: '#/components/responses/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/v1/rules/{id}:
+    put:
+      tags:
+      - Alerts
+      summary: Ganti seluruh aturan
+      responses:
+        '200':
+          description: Berhasil
+        '404':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            example:
+              name: Suhu tinggi
+              operator: gte
+              threshold: 33
+    patch:
+      tags:
+      - Alerts
+      summary: Ubah sebagian aturan
+      responses:
+        '200':
+          description: Berhasil
+        '404':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            example:
+              is_active: false
+    delete:
+      tags:
+      - Alerts
+      summary: Hapus aturan
+      responses:
+        '204':
+          description: Berhasil
+        '404':
+          $ref: '#/components/responses/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+  /api/v1/alerts:
+    get:
+      tags:
+      - Alerts
+      summary: Daftar alert (status, severity, device_id, sort, page)
+      responses:
+        '200':
+          description: Berhasil
+        '422':
+          $ref: '#/components/responses/Error'
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/v1/alerts/{id}:
+    get:
+      tags:
+      - Alerts
+      summary: Detail alert
+      responses:
+        '200':
+          description: Berhasil
+        '404':
+          $ref: '#/components/responses/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    patch:
+      tags:
+      - Alerts
+      summary: Ubah status alert (acknowledged/resolved)
+      responses:
+        '200':
+          description: Berhasil
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            example:
+              status: acknowledged
+components:
+  securitySchemes:
+    DeviceApiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+  responses:
+    Error:
+      description: Format error konsisten
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+                  details:
+                    type: object
+          example:
+            error:
+              code: validation_error
+              message: Validasi input gagal
+              details:
+                email: format email tidak valid
